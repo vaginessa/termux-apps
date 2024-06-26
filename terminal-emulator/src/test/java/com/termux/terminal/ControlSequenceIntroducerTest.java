@@ -1,5 +1,7 @@
 package com.termux.terminal;
 
+import java.util.List;
+
 /** "\033[" is the Control Sequence Introducer char sequence (CSI). */
 public class ControlSequenceIntroducerTest extends TerminalTestCase {
 
@@ -80,6 +82,18 @@ public class ControlSequenceIntroducerTest extends TerminalTestCase {
         mTerminal.resize(columns, rows, cellWidth, cellHeight);
         assertEnteringStringGivesResponse("\033[14t", "\033[4;" + (rows*cellHeight) + ";" + (columns*cellWidth) + "t");
         assertEnteringStringGivesResponse("\033[16t", "\033[6;" + cellHeight + ";" + cellWidth + "t");
+    }
+
+    public void testCsiColon() {
+        withTerminalSized(3, 3);
+        for (var suffix : List.of("", ":1", ":2", ":3", ":4", ":5")) {
+            for (var stopWord : List.of("24m", "4:0m")) {
+                enterString("\033[4:3" + suffix + "m").assertLinesAre("   ", "   ", "   ");
+                assertEquals(TextStyle.CHARACTER_ATTRIBUTE_UNDERLINE, mTerminal.mEffect);
+                enterString("\033[" + stopWord).assertLinesAre("   ", "   ", "   ");
+                assertEquals(0, mTerminal.mEffect);
+            }
+        }
     }
 
 }

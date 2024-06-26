@@ -128,6 +128,10 @@ public final class TerminalEmulator {
      * Escape processing: CSI !
      */
     private static final int ESC_CSI_EXCLAMATION = 19;
+    /**
+     * TODO: Found ':' after csi
+     */
+    private static final int ESC_CSI_COLON = 20;
 
     /**
      * The number of parameter arguments. This name comes from the ANSI standard for terminal escape codes.
@@ -338,7 +342,7 @@ public final class TerminalEmulator {
     /**
      * Current {@link TextStyle} effect.
      */
-    private int mEffect;
+    int mEffect;
 
     /**
      * The number of scrolled lines since last calling {@link #clearScrollCounter()}. Used for moving selection up along
@@ -718,6 +722,13 @@ public final class TerminalEmulator {
                         break;
                     case ESC_CSI:
                         doCsi(b);
+                        break;
+                    case ESC_CSI_COLON:
+                        if (b >= '0' && b <= '9') {
+                           continueSequence(ESC_CSI_COLON);
+                        } else {
+                            doCsi(b);
+                        }
                         break;
                     case ESC_CSI_EXCLAMATION:
                         if (b == 'p') { // Soft terminal reset (DECSTR, http://vt100.net/docs/vt510-rm/DECSTR).
